@@ -41,7 +41,7 @@
 					return $controller->$method();
 				}
 			}
-			return $callback($templating);
+			return $callback($templating, $http_argv);
 		}
 
 		private static function execute_route_with_variables($url, $templating, $http_argv) {
@@ -49,7 +49,7 @@
 				$callback = self::$routes[$route];
 				return $callback($templating, $http_argv);
 			}
-			return self::_404($templating);
+			return self::_404($templating, $http_argv);
 		}
 
 		public static function execute_route($url, $templating, $http_argv) {
