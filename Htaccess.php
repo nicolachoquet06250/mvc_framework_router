@@ -43,12 +43,13 @@
 		public static function init() {
 			self::$htaccess[] = 'Options +FollowSymlinks';
 			self::$htaccess[] = 'RewriteEngine On';
+			self::$htaccess[] = '';
 		}
 		public static function alias($origin, $alias) {
 			self::$htaccess[] = 'Alias '.$origin.' '.$alias;
 		}
 		public static function rewrite_rule($pattern, $substitution, $flags = [self::LAST]) {
-			self::$htaccess[] = 'RewriteRule '.$pattern.' '.$substitution.'['.implode(', ', $flags).']';
+			self::$htaccess[] = 'RewriteRule '.$pattern.' '.$substitution.' ['.implode(', ', $flags).']';
 		}
 		public static function error_document($error, $error_file) {
 			self::$htaccess[] = 'ErrorDocument '.$error.' '.$error_file;
