@@ -45,16 +45,17 @@
 
 		private static function execute_route_with_variables($url, $templating, $http_argv) {
 			if(($route = self::calcul_url_with_vars($url)) !== false) {
+				$local_vars = self::calcul_local_vars($route, $url);
 				$callback = self::$routes[$route];
 				if(gettype($callback) === 'array') {
 					if(self::contains($callback[0], '\mvc\controllers')) {
 						require_once __DIR__.'/../../app/public/mvc/controllers/'.explode('\\', $callback[0])[count(explode('\\', $callback[0]))-1].'.php';
-						$controller = new $callback[0]($templating, $http_argv);
+						$controller = new $callback[0]($templating, $http_argv, $local_vars);
 						$method = $callback[1];
 						return $controller->$method();
 					}
 				}
-				return $callback($templating, $http_argv);
+				return $callback($templating, $http_argv, $local_vars);
 			}
 			return self::_404($templating, $http_argv);
 		}
@@ -115,6 +116,21 @@
 				}
 			}
 			return $url_exists;
+		}
+
+		private static function calcul_local_vars($route, $url) {
+			$route_exploded = explode('/', $route);
+			$url_exploded = explode('/', $url);
+
+			$local_vars = [];
+
+			foreach ($route_exploded as $id => $route_part) {
+				if($route_part !== $url_exploded[$id]) {
+					$parsed = is_numeric($url_exploded[$id]) ? (int)$url_exploded[$id] : $url_exploded[$id];
+					$local_vars[str_replace('@', '', $route_part)] = $parsed;
+				}
+			}
+			return $local_vars;
 		}
 
 		private static function _404($templating, $http_argv) {
