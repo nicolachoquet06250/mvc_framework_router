@@ -5,8 +5,7 @@
 	use mvc_framework\app\mvc\controllers\Errors;
 
 	class Router {
-		private static $routes = [];
-		private static $content_types = ['api' => 'application/json', 'front' => 'text/html'];
+		private static $content_types = ['api' => 'application/json', 'front' => 'text/html'], $routes = [];
 
 		public static function route($url, $callback, $type = 'api') {
 			if(isset(self::$content_types[$type])) {
@@ -47,6 +46,14 @@
 		private static function execute_route_with_variables($url, $templating, $http_argv) {
 			if(($route = self::calcul_url_with_vars($url)) !== false) {
 				$callback = self::$routes[$route];
+				if(gettype($callback) === 'array') {
+					if(self::contains($callback[0], '\mvc\controllers')) {
+						require_once __DIR__.'/../../app/public/mvc/controllers/'.explode('\\', $callback[0])[count(explode('\\', $callback[0]))-1].'.php';
+						$controller = new $callback[0]($templating, $http_argv);
+						$method = $callback[1];
+						return $controller->$method();
+					}
+				}
 				return $callback($templating, $http_argv);
 			}
 			return self::_404($templating, $http_argv);
@@ -60,6 +67,18 @@
 				return self::execute_route_with_variables($url, $templating, $http_argv);
 			}
 			else {
+				$uri_base = explode('?', $url)[0];
+				$uri_base = explode('/', $uri_base);
+				$ctrl = $uri_base[1];
+				$method = ucfirst(strtolower($_SERVER['REQUEST_METHOD']));
+				if(file_exists(realpath(__DIR__.'/../../app/public/mvc/controllers/'.$ctrl.'.php'))) {
+					require_once realpath(__DIR__.'/../../app/public/mvc/controllers/'.$ctrl.'.php');
+					$ctrl_class = '\mvc_framework\app\mvc\controllers\\'.$ctrl;
+					if(in_array($method, get_class_methods($ctrl_class))) {
+						return (new $ctrl_class($templating, $http_argv))->$method();
+					}
+					return self::_404($templating, $http_argv);
+				}
 				return self::_404($templating, $http_argv);
 			}
 		}
