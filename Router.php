@@ -57,7 +57,7 @@
 				}
 				return $callback($templating, $http_argv, $local_vars);
 			}
-			return self::_404($templating, $http_argv);
+			return self::_404($templating, $http_argv, 'Route for current URL not found !');
 		}
 
 		public static function execute_route($url, $templating, $http_argv) {
@@ -78,9 +78,9 @@
 					if(in_array($method, get_class_methods($ctrl_class))) {
 						return (new $ctrl_class($templating, $http_argv))->$method();
 					}
-					return self::_404($templating, $http_argv);
+					return self::_404($templating, $http_argv, 'Method '.$method.' not found in '.$ctrl.' controller !');
 				}
-				return self::_404($templating, $http_argv);
+				return self::_404($templating, $http_argv, 'Controller '.$ctrl.' not found !');
 			}
 		}
 
@@ -133,9 +133,9 @@
 			return $local_vars;
 		}
 
-		private static function _404($templating, $http_argv) {
+		private static function _404($templating, $http_argv, $message = '') {
 			require_once __DIR__.'/../../app/public/mvc/controllers/Errors.php';
 			$controller = new Errors($templating, $http_argv);
-			return $controller->_404();
+			return $controller->_404($message);
 		}
 	}
