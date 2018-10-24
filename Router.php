@@ -3,17 +3,18 @@
 	namespace mvc_framework\core\router;
 
 	use mvc_framework\app\mvc\controllers\Errors;
+	use mvc_framework\core\starter\AppStarter;
 
 	class Router {
-		private static $content_types = ['api' => 'application/json', 'front' => 'text/html'], $routes = [];
+		private static $content_types = [AppStarter::PAGE_API => 'application/json', AppStarter::PAGE_FRONT => 'text/html'], $routes = [];
 
-		public static function route($url, $callback, $type = 'api') {
+		public static function route($url, $callback, $type = AppStarter::PAGE_API) {
 			if(isset(self::$content_types[$type])) {
 				self::$routes[$url] = $callback;
 			}
 		}
 
-		public static function route_controller($url, $class, $method, $type = 'api') {
+		public static function route_controller($url, $class, $method, $type = AppStarter::PAGE_API) {
 			if(isset(self::$content_types[$type])) {
 				self::$routes[$url] = [
 					$class,
